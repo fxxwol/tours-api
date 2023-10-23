@@ -27,8 +27,7 @@ const authAccess = async (req, res, next) => {
 }
 const adminAccess = async (req, res, next) => {
     if (req.user.role !== 'admin') {
-        res.status(401);
-        return res.send('Not allowed')
+        next(HttpError(401, "You don't have rights to access this source"))
     }
     next()
 }
