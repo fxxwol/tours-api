@@ -1,7 +1,7 @@
 const { Tour } = require('../models/tour')
 const { ctrlWrapper, HttpError } = require('../helpers')
 
-// updateById, deleteById, addToCart, deleteFromCart, search??
+// addToCart, deleteFromCart, search?
 
 const getAll = async (req, res) => {
     const tours = await Tour.find()
@@ -38,12 +38,20 @@ const updateById = async (req, res) => {
         throw HttpError(404)
     }
     res.json(updated)
-
 }
 
+const deleteById = async (req, res, next) => {
+    const { id } = req.params
+    const deleted = await Tour.findByIdAndDelete(id)
+    if (!deleted) {
+        throw HttpError(404)
+    }
+    res.json(deleted)
+}
 module.exports = {
     getAll: ctrlWrapper(getAll),
     getById: ctrlWrapper(getById),
     add: ctrlWrapper(add),
-    updateById: ctrlWrapper(updateById)
+    updateById: ctrlWrapper(updateById),
+    deleteById: ctrlWrapper(deleteById)
 }
