@@ -1,7 +1,7 @@
 const { Tour } = require('../models/tour')
 const { ctrlWrapper, HttpError } = require('../helpers')
 
-// addToCart, deleteFromCart, search?
+// search?
 
 const getAll = async (req, res) => {
     const tours = await Tour.find()
@@ -48,6 +48,7 @@ const deleteById = async (req, res, next) => {
     }
     res.json(deleted)
 }
+
 module.exports = {
     getAll: ctrlWrapper(getAll),
     getById: ctrlWrapper(getById),
