@@ -1,9 +1,8 @@
 const { Order } = require('../models/order')
 const { ctrlWrapper, HttpError, getTotalPrice } = require('../helpers');
-const { Tour } = require('../models/tour');
 const { isValidObjectId } = require('mongoose');
 
-// increaseTourAmount, updateStatus, submitOrder
+// submitOrder
 
 const getAll = async (req, res) => {
     const orders = await Order.find();
@@ -15,29 +14,31 @@ const getAll = async (req, res) => {
 
 const add = async (req, res) => {
     const { _id: owner } = req.user;
-    const { tourId } = req.params
+    const { tourId } = req.body;
     if (!isValidObjectId(tourId)) {
         throw HttpError(400, `${tourId} is not valid id`)
     }
-    const tour = await Tour.findById(tourId)
-    if (!tour) {
-        throw HttpError(404, "Invalid tour id")
-    }
 
-    const order = await Order.findOne({ owner, status: "waiting", tour: tourId });
+    let order = await Order.findOne({
+        owner, status: "waiting"
+    })
 
-    if (order) {
-        order.amount++
-        order.totalPrice = await getTotalPrice(tour, order.amount)
-        await order.save()
-        res.json(order)
+    if (!order) {
+        order = await Order.create({ tours: [{ tour: tourId }], owner });
+    } else {
+        const tourIndex = order.tours.findIndex((tourObject) => tourObject.tour.toString() === tourId.toString());
+
+        if (tourIndex !== -1) {
+            order.tours[tourIndex].amount++;
+        } else {
+            order.tours.push({ tour: tourId });
+        }
     }
-    else {
-        const newOrder = await Order.create({ tour: tourId, owner })
-        newOrder.totalPrice = await getTotalPrice(tour, newOrder.amount)
-        await newOrder.save()
-        res.status(201).json(newOrder)
-    }
+    const totalPrice = await getTotalPrice(order);
+    order.totalPrice = totalPrice;
+
+    await order.save();
+    res.status(order.isNew ? 201 : 200).json(order);
 }
 
 const deleteById = async (req, res) => {
@@ -47,6 +48,34 @@ const deleteById = async (req, res) => {
         throw HttpError(404)
     }
     res.json(deleted)
+}
+
+const deleteTourById = async (req, res) => {
+    const { _id: owner } = req.user
+    const { tourId } = req.body
+
+    if (!isValidObjectId(tourId)) {
+        throw HttpError(400, `${tourId} is not valid id`)
+    }
+
+    const order = await Order.findOne({ owner, status: "waiting", 'tours._id': tourId })
+    if (!order) {
+        throw HttpError(404)
+    }
+    const tourIndex = order.tours.findIndex((tourObject) => tourObject._id.toString() === tourId.toString());
+    if (order.tours[tourIndex].amount > 1) {
+        order.tours[tourIndex].amount--;
+    } else {
+        order.tours.splice(tourIndex, 1)
+    }
+    order.totalPrice = await getTotalPrice(order)
+    await order.save()
+    if (order.tours.length === 0) {
+        await Order.findByIdAndDelete(order._id);
+        res.status(204).send();
+    } else {
+        res.json(order);
+    }
 }
 
 const getWaiting = async (req, res) => {
@@ -59,21 +88,32 @@ const getWaiting = async (req, res) => {
 }
 
 const updateStatus = async (req, res) => {
-
+    const { id } = req.params
+    const order = await Order.findByIdAndUpdate(id, req.body, { new: true })
+    if (!order) {
+        throw HttpError(404, 'Not found')
+    }
+    res.json(order)
 }
-const increaseTourAmount = async (req, res) => {
 
-}
-const submit = async (req, res) => {
-
-}
+// const submit = async (req, res) => {
+//     const { _id: owner } = req.user;
+//     const result = await Order.updateMany({ owner, status: "waiting" }, { $set: { status: 'pending' } });
+//     if (!result.matchedCount) {
+//         throw HttpError(404)
+//     }
+//     res.json({
+//         message: 'Submitted successfuly',
+//         orderId: 
+//     })
+// }
 
 module.exports = {
     getAll: ctrlWrapper(getAll),
     getWaiting: ctrlWrapper(getWaiting),
     updateStatus: ctrlWrapper(updateStatus),
-    increaseTourAmount: ctrlWrapper(increaseTourAmount),
-    submit: ctrlWrapper(submit),
+    // submit: ctrlWrapper(submit),
     add: ctrlWrapper(add),
     deleteById: ctrlWrapper(deleteById),
+    deleteTourById: ctrlWrapper(deleteTourById),
 }

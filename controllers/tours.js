@@ -12,7 +12,7 @@ const getAll = async (req, res) => {
 }
 
 const getById = async (req, res, next) => {
-    const tour = await Tour.findById(req.params.tourId)
+    const tour = await Tour.findById(req.params.id)
     if (!tour) {
         throw HttpError(400)
     }
