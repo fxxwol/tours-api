@@ -1,7 +1,7 @@
 const { Tour } = require('../models/tour')
 const { ctrlWrapper, HttpError } = require('../helpers')
 
-// search?
+// getAllCountries
 
 const getAll = async (req, res) => {
     const tours = await Tour.find()
@@ -9,6 +9,32 @@ const getAll = async (req, res) => {
         throw HttpError(400)
     }
     res.json(tours)
+}
+
+const getToursByFilter = async (req, res) => {
+    const { query, date, country } = req.query;
+    const where = {};
+
+    if (query) {
+        where.name = { $regex: query, $options: "i" };
+    }
+    if (date) {
+        where.date = date;
+    }
+
+    if (country) {
+        where.country = { $regex: `^${country}$`, $options: "i" };
+    }
+    const tours = await Tour.find(where);
+    if (!tours) {
+        throw HttpError(400)
+    }
+    res.json(tours);
+}
+
+const getAllCountries = async (req, res) => {
+    const countries = await Tour.find().select('country')
+    res.json(countries)
 }
 
 const getById = async (req, res, next) => {
@@ -53,6 +79,8 @@ module.exports = {
     getAll: ctrlWrapper(getAll),
     getById: ctrlWrapper(getById),
     add: ctrlWrapper(add),
+    getToursByFilter: ctrlWrapper(getToursByFilter),
+    getAllCountries: ctrlWrapper(getAllCountries),
     updateById: ctrlWrapper(updateById),
     deleteById: ctrlWrapper(deleteById)
 }

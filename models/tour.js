@@ -8,7 +8,7 @@ const tourSchema = new Schema(
             required: [true, "Name is required"]
         },
         date: {
-            type: Date,
+            type: String,
             required: [true, "Date is required"]
         },
         description: {
