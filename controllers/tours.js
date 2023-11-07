@@ -1,8 +1,6 @@
 const { Tour } = require('../models/tour')
 const { ctrlWrapper, HttpError } = require('../helpers')
 
-// getAllCountries
-
 const getAll = async (req, res) => {
     const tours = await Tour.find()
     if (!tours) {
@@ -37,7 +35,7 @@ const getAllCountries = async (req, res) => {
     res.json(countries)
 }
 
-const getById = async (req, res, next) => {
+const getById = async (req, res) => {
     const tour = await Tour.findById(req.params.id)
     if (!tour) {
         throw HttpError(400)

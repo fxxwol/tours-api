@@ -2,8 +2,6 @@ const { Order } = require('../models/order')
 const { ctrlWrapper, HttpError, getTotalPrice } = require('../helpers');
 const { isValidObjectId } = require('mongoose');
 
-// submitOrder
-
 const getAll = async (req, res) => {
     const orders = await Order.find();
     if (!orders) {
