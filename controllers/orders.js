@@ -52,7 +52,7 @@ const deleteById = async (req, res) => {
 
 const deleteTourById = async (req, res) => {
     const { _id: owner } = req.user
-    const { tourId } = req.body
+    const { tourId } = req.params
 
     if (!isValidObjectId(tourId)) {
         throw HttpError(400, `${tourId} is not valid id`)
@@ -96,23 +96,23 @@ const updateStatus = async (req, res) => {
     res.json(order)
 }
 
-// const submit = async (req, res) => {
-//     const { _id: owner } = req.user;
-//     const result = await Order.updateMany({ owner, status: "waiting" }, { $set: { status: 'pending' } });
-//     if (!result.matchedCount) {
-//         throw HttpError(404)
-//     }
-//     res.json({
-//         message: 'Submitted successfuly',
-//         orderId: 
-//     })
-// }
+const submit = async (req, res) => {
+    const { _id: owner } = req.user;
+    const order = await Order.findOneAndUpdate({ owner, status: 'waiting' }, { $set: { status: 'pending' } },{new:true})
+    if (!order) {
+        throw HttpError(404)
+    }
+    res.json({
+        orderId: order._id,
+        message: 'Submitted successfuly',
+    })
+}
 
 module.exports = {
     getAll: ctrlWrapper(getAll),
     getWaiting: ctrlWrapper(getWaiting),
     updateStatus: ctrlWrapper(updateStatus),
-    // submit: ctrlWrapper(submit),
+    submit: ctrlWrapper(submit),
     add: ctrlWrapper(add),
     deleteById: ctrlWrapper(deleteById),
     deleteTourById: ctrlWrapper(deleteTourById),
