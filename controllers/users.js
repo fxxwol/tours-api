@@ -66,9 +66,9 @@ const logout = async (req, res) => {
 }
 
 const current = async (req, res) => {
-    const { email } = req.user;
+    const { name } = req.user;
     res.json({
-        email
+        name
     })
 }
 
