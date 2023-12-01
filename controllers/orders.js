@@ -78,11 +78,11 @@ const deleteTourById = async (req, res) => {
 
 const getWaiting = async (req, res) => {
     const { _id: owner } = req.user;
-    const orders = await Order.find({ owner, status: "waiting" });
-    if (!orders) {
+    const order = await Order.findOne({ owner, status: "waiting" }).populate("tours.tour", "name price");
+    if (!order) {
         throw HttpError(404)
     }
-    res.json(orders)
+    res.json(order)
 }
 
 const updateStatus = async (req, res) => {
