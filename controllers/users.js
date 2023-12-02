@@ -24,7 +24,8 @@ const register = async (req, res) => {
     res.status(201).json({
         token: verificationToken,
         user: {
-            name
+            name,
+            role: "user"
         }
     })
 }
