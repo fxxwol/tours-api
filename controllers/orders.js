@@ -56,7 +56,7 @@ const deleteTourById = async (req, res) => {
         throw HttpError(400, `${tourId} is not valid id`)
     }
 
-    const order = await Order.findOne({ owner, status: "waiting", 'tours._id': tourId })
+    const order = await Order.findOne({ owner, status: "waiting", 'tours._id': tourId }).populate("tours.tour")
     if (!order) {
         throw HttpError(404)
     }
