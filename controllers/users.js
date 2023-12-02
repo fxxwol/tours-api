@@ -68,9 +68,10 @@ const logout = async (req, res) => {
 }
 
 const current = async (req, res) => {
-    const { name } = req.user;
+    const { name, role} = req.user;
     res.json({
-        name
+        name,
+        role
     })
 }
 
