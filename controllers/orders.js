@@ -22,9 +22,9 @@ const add = async (req, res) => {
     })
 
     if (!order) {
-        order = await Order.create({ tours: [{ tour: tourId }], owner });
+         order = await Order.create({ tours: [{ tour: tourId }], owner });
     } else {
-        const tourIndex = order.tours.findIndex((tourObject) => tourObject.tour.toString() === tourId.toString());
+        const tourIndex = order.tours.findIndex((tourObject) => tourObject.tour._id.toString() === tourId.toString());
 
         if (tourIndex !== -1) {
             order.tours[tourIndex].amount++;
@@ -32,10 +32,12 @@ const add = async (req, res) => {
             order.tours.push({ tour: tourId });
         }
     }
+    order = await Order.populate(order, "tours.tour");
     const totalPrice = await getTotalPrice(order);
     order.totalPrice = totalPrice;
 
     await order.save();
+
     res.status(order.isNew ? 201 : 200).json(order);
 }
 
@@ -96,7 +98,7 @@ const updateStatus = async (req, res) => {
 
 const submit = async (req, res) => {
     const { _id: owner } = req.user;
-    const order = await Order.findOneAndUpdate({ owner, status: 'waiting' }, { $set: { status: 'pending' } },{new:true})
+    const order = await Order.findOneAndUpdate({ owner, status: 'waiting' }, { $set: { status: 'pending' } }, { new: true })
     if (!order) {
         throw HttpError(404)
     }
