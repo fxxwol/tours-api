@@ -51,7 +51,8 @@ const login = async (req, res) => {
     res.json({
         token,
         user: {
-            name: user.name
+            name: user.name,
+            role: user.role
         }
     })
 }
