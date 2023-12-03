@@ -3,7 +3,14 @@ const { ctrlWrapper, HttpError, getTotalPrice } = require('../helpers');
 const { isValidObjectId } = require('mongoose');
 
 const getAll = async (req, res) => {
-    const orders = await Order.find();
+    const orders = await Order.find().populate({
+        path: 'owner',
+        select: 'name lastName email',
+    })
+        .populate({
+            path: 'tours.tour',
+            select: 'name price country city',
+        });;
     if (!orders) {
         throw HttpError(400)
     }
