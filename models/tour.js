@@ -34,6 +34,9 @@ const tourSchema = new Schema(
         duration: {
             type: Number,
             required: [true, "Duration is required"]
+        },
+        image: {
+            type: String,
         }
 
     }, { versionKey: false })
@@ -48,7 +51,8 @@ const tourJoiSchema = Joi.object({
     country: Joi.string().required(),
     city: Joi.string().required(),
     price: Joi.number().min(1).required(),
-    duration: Joi.number().min(1).required()
+    duration: Joi.number().min(1).required(),
+    image: Joi.string()
 })
 
 const updateTourSchema = Joi.object({

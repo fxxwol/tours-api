@@ -6,7 +6,7 @@ mongoose
   .then(() => {
     console.log("Database connection successful");
     app.listen(PORT, () => {
-      console.log("Server running, port: 5000");
+      console.log(`Server running, port: ${PORT}`);
     });
   })
   .catch((error) => {
